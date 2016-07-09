@@ -1,0 +1,145 @@
+
+lib Xi
+ - libXi
+
+lib Xrandr
+ - libxrandr
+
+lib Xcursor
+ - libxcursor
+
+lib Xinerama
+ - libxinerama-dev
+
+lib bz2
+ - libbz2-dev
+
+pkgconfig cairo
+ - libcairo2-dev
+
+lib curl
+ - libcurl4-openssl-dev
+
+lib markdown
+ - libmarkdown2-dev
+
+lib gd
+ - libgd-dev
+
+lib png
+ - libpng-dev
+
+lib jpeg
+ - libjpeg-dev
+
+lib fontconfig
+ - libfontconfig-dev
+
+lib freetype
+ - libfreetype6-dev
+
+lib GL
+ - freeglut3-dev
+
+pkgconfig glib-2.0
+ - libglib2.0-dev
+
+pkgconfig libidn
+ - libidn11-dev
+
+pkgconfig gnutls
+ - libgnutls-dev
+
+pkgconfig libgsasl
+  - libgsasl7-dev
+
+pkgconfig gobject-2.0
+  - python-gobject-2-dev
+
+pkgconfig hidapi-libusb
+  - libhidapi-dev
+
+lib udev
+  - libudev1
+
+lib ssl
+  - libssl
+
+lib crypto
+  - libssl
+
+lib blas
+ - libblas-dev
+
+lib lapack
+ - liblapack-dev
+
+lib GeoIP
+ - libgeoip-dev
+
+lib sndfile
+ - libsndfile1-dev
+
+lib tag_c
+ - libtagc0-dev
+
+file bsd/libutil.h
+ - libbsd-dev
+
+pkgconfig libR
+ - r-base-core
+
+lib leveldb
+ - libleveldb-dev
+
+pkgconfig libsystemd
+ - libsystemd-daemon-dev
+
+pkgconfig libxml-2.0
+ - libxml2-dev
+
+lib lzma
+ - liblzma-dev
+
+lib magic
+ - libmagic-dev
+
+program mysql_config
+ - libmysqlclient-dev
+
+pkgconfig nettle
+ - nettle-dev
+
+lib pcap
+ - libpcap-dev
+
+pkgconfig libpcre
+ - libpcre3-dev
+
+lib pcre
+ - libpcre3-dev
+
+lib IL
+ - libdevil-dev
+
+program pg_config
+ - xenial: postgresql-server-dev-9.5
+ - wily: postgresql-server-dev-9.4
+ - trusty: postgresql-server-dev-9.3
+ - precise: postgresql-server-dev-9.1
+
+configure 'readline not found'
+ - libreadline6-dev
+
+pkgconfig sdl2
+ - libsdl1.2-dev
+
+configure 'curses headers could not be found'
+ - libncurses5-dev
+
+lib fftw3
+ - libfftw3-dev
+
+configure 'X11/extensions/Xrandr.h (from libXrandr)'
+ - libxrandr-dev
+

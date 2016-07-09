@@ -1,35 +1,40 @@
 import collections
+from collections import namedtuple
+import re
 
-BuildError = collections.namedtuple("BuildError", "kind args")
+BuildError = namedtuple("BuildError", "kind args")
 
-MissingCLibrary = "MissingCLibrary"
-MissingCHeader = "MissingCHeader"
-NoSuchFile = "NoSuchFile"
-CheckingFor = "CheckingFor"
-RequiredProgram = "RequiredProgram"
-ConfigureError = "ConfigureError"
-PkgConfigMissing = "PkgConfigMissing"
+# MissingCLibrary = "MissingCLibrary"
+# MissingCHeader = "MissingCHeader"
 
-PkgConfigError = collections.namedtuple("PkgConfigError", "kind args bounds")
+# NoSuchFile = "NoSuchFile"
+# RequiredProgram = "RequiredProgram"
+# ConfigureError = "ConfigureError"
+# PkgConfigMissing = "PkgConfigMissing"
+
+PkgConfigError  = namedtuple("PkgConfigError", "arg bounds")
+MissingCLibrary = namedtuple('MissingCLibrary', "libs")
+MissingCHeader  = namedtuple("MissingCHeader", "arg")
+NoSuchFile      = namedtuple("NoSuchFile", "arg")
+RequiredProgram = namedtuple("RequiredProgram", "arg")
+ConfigureError  = namedtuple("ConfigureError", "arg")
 
 def mkMissingCLibrary(args):
-  return BuildError(kind = MissingCLibrary, args = args)
+  libs = re.split(" *, *", args)
+  return MissingCLibrary(libs = libs)
 
-def mkMissingCHeader(args):
-  return BuildError(kind = MissingCHeader, args = args)
+def mkMissingCHeader(arg):
+  return MissingCHeader(arg)
 
-def mkNoSuchFile(args):
-  return BuildError(kind = NoSuchFile, args = args)
+def mkNoSuchFile(arg):
+  return NoSuchFile(arg)
 
-def mkCheckinFor(args):
-  return BuildError(kind = CheckingFor, args = args)
+def mkRequiredProgram(arg):
+  return RequiredProgram(arg)
 
-def mkRequiredProgram(args):
-  return BuildError(kind = RequiredProgram, args = args)
+def mkConfigureError(arg):
+  return ConfigureError(arg)
 
-def mkConfigureError(args):
-  return BuildError(kind = ConfigureError, args = args)
-
-def mkPkgConfigMissing(args, bounds = None):
-  return PkgConfigError(kind = PkgConfigMissing, args = args, bounds = bounds)
+def mkPkgConfigMissing(arg, bounds = None):
+  return PkgConfigError(arg = arg, bounds = bounds)
 

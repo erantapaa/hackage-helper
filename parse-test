@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+import rules
+
+def main():
+  with open("all-rules") as f:
+    lines = f.readlines()
+  rs = rules.parse_rules(lines)
+
+  for r,specs in rs:
+    print r
+    for s in specs:
+      print " -", s
+    print
+
+main()
+

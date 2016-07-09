@@ -33,12 +33,14 @@ def main():
         print "ERROR - {} - ended ok but has errors:".format(pkg)
         for e in errors:
           print "-", e
+        print
     else:
       if not errors:
         print "ERROR - {} - did not end ok but no errors found".format(pkg)
       else:
         print "{} - errors:".format(pkg)
         for e in errors: print "-", e
+      print
 
 if __name__ == '__main__':
   main()

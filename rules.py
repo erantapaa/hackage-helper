@@ -41,7 +41,14 @@ class IsMember():
   def __str__(self):
     return "IsMember(" + str(self.needed) + ")"
 
-class LibRule():
+class BaseRule():
+  def __init__(self):
+    pass
+
+  def check(self, error):
+    return error.type in self.error_classes() and self.matches(error)
+
+class LibRule(BaseRule):
   def __init__(self, lib):
     self.needed = lib
 
@@ -54,7 +61,7 @@ class LibRule():
   def __str__(self):
     return "LibRule(" + str(self.needed) + ")"
 
-class ProgramRule():
+class ProgramRule(BaseRule):
   def __init__(self, pat):
     self.prog_pat = pat
 
@@ -67,7 +74,7 @@ class ProgramRule():
   def __str__(self):
     return "ProgramRule(" + str(self.prog_pat) + ")"
 
-class ConfigureRule():
+class ConfigureRule(BaseRule):
   def __init__(self, config_pat):
     self.config_pat = config_pat
 
@@ -80,7 +87,7 @@ class ConfigureRule():
   def __str__(self):
     return "ConfigureRule(" + str(self.config_pat) + ")"
 
-class PkgConfigRule():
+class PkgConfigRule(BaseRule):
   def __init__(self, pkg_pat, bounds_pat):
     self.pkg_pat = pkg_pat
     self.bounds_pat = bounds_pat
@@ -94,7 +101,7 @@ class PkgConfigRule():
   def __str__(self):
     return "PkgConfigRule(" + str(self.pkg_pat) + ")"
 
-class NoSuchFileRule():
+class NoSuchFileRule(BaseRule):
   def __init__(self, file_pat):
     self.file_pat = file_pat
 
@@ -121,23 +128,30 @@ class NoSuchFileRule():
 #
 # file ...
 
+TOKEN_RE = r"(?:('(.*)')|(\"(.*)\")|(\S+))"
+
+def extract_token(m, i):
+  if not m:
+    return None
+  if m.group(i+0):
+    return m.group(i+1)
+  if m.group(i+2):
+    return m.group(i+3)
+  return m.group(i+4)
+
 def parse_rule(s):
   m = re.match("lib\s+(\S+)", s)
   if m:
     return LibRule( m.group(1) )
 
-  m = re.match("program\s+(\S+)", s)
-  if m:
-    return ProgramRule( Equals(m.group(1)) )
+  m = re.match("program\s+(?:('(.*)')|(\"(.*)\")|(\S+))", s)
+  arg = extract_token(m, 1)
+  if arg is not None:
+    return ProgramRule( Equals( arg ) )
 
   m = re.match("configure\s+(?:('(.*)')|(\"(.*)\")|(\S+))", s)
-  if m:
-    if m.group(1):
-      arg = m.group(2)
-    elif m.group(3):
-      arg = m.group(4)
-    else:
-      arg = m.group(5)
+  arg = extract_token(m, 1)
+  if arg is not None:
     return ConfigureRule( Equals( arg ) )
 
   m = re.match("pkgconfig\s+(\S+)(\s+'(.*?)')?", s)

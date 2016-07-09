@@ -13,11 +13,22 @@ BuildError = namedtuple("BuildError", "kind args")
 # PkgConfigMissing = "PkgConfigMissing"
 
 PkgConfigError  = namedtuple("PkgConfigError", "arg bounds")
+PkgConfigError.type = "PkgConfigError"
+
 MissingCLibrary = namedtuple('MissingCLibrary', "libs")
+MissingCLibrary.type = "MissingCLibrary"
+
 MissingCHeader  = namedtuple("MissingCHeader", "arg")
+MissingCHeader.type = "MissingCHeader"
+
 NoSuchFile      = namedtuple("NoSuchFile", "arg")
+NoSuchFile.type = "NoSuchFile"
+
 RequiredProgram = namedtuple("RequiredProgram", "arg")
+RequiredProgram.type = "RequiredProgram"
+
 ConfigureError  = namedtuple("ConfigureError", "arg")
+ConfigureError.type = "ConfigureError"
 
 def mkMissingCLibrary(args):
   libs = re.split(" *, *", args)

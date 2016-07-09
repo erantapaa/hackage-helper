@@ -122,7 +122,7 @@ lib pcre
 lib IL
  - libdevil-dev
 
-program pg_config
+program 'pgconfig or pg_config'
  - xenial: postgresql-server-dev-9.5
  - wily: postgresql-server-dev-9.4
  - trusty: postgresql-server-dev-9.3

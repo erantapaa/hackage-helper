@@ -22,10 +22,8 @@ lib Xcursor
 lib Xinerama
  - libxinerama-dev
 
-dot-h bzlib.h
- - libbz2-dev
-
 lib bz2
+dot-h bzlib.h
  - libbz2-dev
 
 pkgconfig cairo
@@ -38,8 +36,6 @@ lib markdown
  - libmarkdown2-dev
 
 dot-h gd.h
- - libgd-dev
-
 lib gd
  - libgd-dev
 
@@ -80,8 +76,6 @@ lib udev
   - libudev1
 
 dot-h openssl/evp.h
- - libssl
-
 lib ssl
   - libssl
 
@@ -119,8 +113,6 @@ pkgconfig libxml-2.0
  - libxml2-dev
 
 dot-h lzma.h
- - liblzma-dev
-
 lib lzma
  - liblzma-dev
 
@@ -134,8 +126,6 @@ pkgconfig nettle
  - nettle-dev
 
 dot-h pcap.h
- - libpcap-dev
-
 lib pcap
  - libpcap-dev
 

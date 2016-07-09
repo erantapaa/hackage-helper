@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import cabal_log
-import rules
 import re
 import os
 import sys
+import argparse
+import cabal_log
+import rules
 
 def analyze_error(allrules, error):
   for r, spec in allrules:
@@ -20,47 +21,72 @@ def find_errors(contents):
   cabal_log.parse_multiline_errors(contents, errors)
   return errors
 
-def process_log_contents(allrules, path, contents):
-    errors = find_errors(contents)
-    unresolved = []
-    specs = []
-    if errors:
-      for e in errors:
-        s = analyze_error(allrules, e)
-        if not s:
-          unresolved.append(e)
-        else:
-          specs.append(s)
-    print "file:", path
+def analyze_errors(allrules, contents):
+  errors = find_errors(contents)
+  unresolved = []
+  specs = []
+  if errors:
+    for e in errors:
+      s = analyze_error(allrules, e)
+      if not s:
+        unresolved.append(e)
+      else:
+        specs.append(s)
+  return (errors, unresolved, specs)
+
+def process_log_contents(opts, allrules, path, contents):
+    errors, unresolved, specs = analyze_errors(allrules, contents)
     if not errors:
-      print "No errors found."
+      if opts.v:
+        print "file: {} - No errors found.".format(path)
     else:
+      print "file:", path
+
+      multispecs = []
+      singles = set()
+
       for s in specs:
-        for ss in s:
-          print " -", ss
+        if len(s) == 1 and s[0].suite is None:
+          singles.add( s[0].pkgname )
+        else:
+          multispecs.append(s)
+
+      for pkgname in singles:
+        print " -", pkgname
+      for ms in multispecs:
+        for s in ms:
+          print " -", str(s.suite) + ": " + s.pkgname
       if unresolved:
         print "unresolved errors:"
         for e in unresolved:
           print " -", e
-    print
+      print
 
-def process_log_file(allrules, path):
+def process_log_file(opts, allrules, path):
     if path == "-":
       contents = sys.stdin.read()
       pname = "(stdin)"
     else:
       with open(path) as f: contents = f.read()
       pname = path
-    process_log_contents(allrules, pname, contents)
+    process_log_contents(opts, allrules, pname, contents)
 
 def main():
+  parser = argparse.ArgumentParser(description='Analyze GHC log files')
+  parser.add_argument('-v', action='store_true',  help="verbose output")
+  parser.add_argument('files', metavar='FILE', type=str, nargs='*',
+                       help="log files")
+  opts = parser.parse_args()
+
+  if not opts.files:
+    opts.files = ['-']
+
   with open("all-rules") as f:
     lines = f.readlines()
   allrules = rules.parse_rules(lines)
-  # for r,s in allrules: print r
 
-  for path in sys.argv[1:]:
-    process_log_file(allrules, path)
+  for path in opts.files:
+    process_log_file(opts, allrules, path)
 
 main()
 

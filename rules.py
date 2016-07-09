@@ -45,9 +45,9 @@ class OrClause():
   def __init__(self, children):
     self.children = children
 
-  def matches(self, error):
+  def check(self, error):
     for c in self.children:
-      if c.matches(error): return True
+      if c.check(error): return True
     return False
 
   def __str__(self):
@@ -251,15 +251,12 @@ def remove_comments(lines):
 def parse_rules(lines):
   it = remove_comments(lines)
   t = next(it, None)
-  print "t0 =", t
 
   stanzas = []
 
   while t:
     clauses, t = parse_clauses(it, t)
-    print "clauses:", clauses
     specs, t = parse_pkgspecs(it, t)
-    print "specs:", specs
     if len(clauses) > 1:
       stanza = Stanza( clauses=OrClause(clauses), pkgspecs=specs )
     else:

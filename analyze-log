@@ -6,7 +6,6 @@ import re
 import os
 import sys
 
-
 def analyze_error(allrules, error):
   for r, spec in allrules:
     if r.check(error):
@@ -33,18 +32,26 @@ def process_log_contents(allrules, path, contents):
         else:
           specs.append(s)
     print "file:", path
-    for s in specs:
-      for ss in s:
-        print " -", ss
-    if unresolved:
-      print "unresolved errors:"
-      for e in unresolved:
-        print " -", e
+    if not errors:
+      print "No errors found."
+    else:
+      for s in specs:
+        for ss in s:
+          print " -", ss
+      if unresolved:
+        print "unresolved errors:"
+        for e in unresolved:
+          print " -", e
     print
 
 def process_log_file(allrules, path):
-    with open(path) as f: contents = f.read()
-    process_log_contents(allrules, path, contents)
+    if path == "-":
+      contents = sys.stdin.read()
+      pname = "(stdin)"
+    else:
+      with open(path) as f: contents = f.read()
+      pname = path
+    process_log_contents(allrules, pname, contents)
 
 def main():
   with open("all-rules") as f:

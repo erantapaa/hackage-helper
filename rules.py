@@ -41,6 +41,18 @@ class IsMember():
   def __str__(self):
     return "IsMember(" + str(self.needed) + ")"
 
+class OrClause():
+  def __init__(self, children):
+    self.children = children
+
+  def matches(self, error):
+    for c in self.children:
+      if c.matches(error): return True
+    return False
+
+  def __str__(self):
+    return "OrClause(" + ', '.join([ str(c) for c in self.children ]) + ")"
+
 class BaseRule():
   def __init__(self):
     pass
@@ -60,6 +72,19 @@ class LibRule(BaseRule):
 
   def __str__(self):
     return "LibRule(" + str(self.needed) + ")"
+
+class CHeaderRule(BaseRule):
+  def __init__(self, doth):
+    self.doth = doth
+
+  def matches(self, error):
+    return self.doth.matches( error.arg )
+
+  def error_classes(self):
+    return [ "MissingCHeader" ]
+
+  def __str__(self):
+    return "CHeaderRule(" + str(self.doth) + ")"
 
 class ProgramRule(BaseRule):
   def __init__(self, pat):
@@ -166,6 +191,10 @@ def parse_rule(s):
   if m:
     return NoSuchFileRule( Equals(m.group(1)) )
 
+  m = re.match("dot-h\s+(\S+)", s)
+  if m:
+    return CHeaderRule( Equals(m.group(1)) )
+
   return None
 
 PackageSpec = collections.namedtuple("PackageSpec", "suite pkgname")
@@ -174,29 +203,82 @@ def die(msg):
   sys.stderr.write(msg + "\n")
   sys.exit(1)
 
-def parse_rules(lines):
-  rs = []
-  i = 0
-  while i < len(lines):
-    x = lines[i]
-    i += 1
-    if re.match("\s*(#.*)?\Z", x):
+def syntax_error(msg, t):
+  die( "syntax error line {}: {}\n{}".format(t.pos, msg, t.content) )
+
+def parse_clauses(it, t):
+  r = parse_rule(t.content)
+  if not r:
+    syntax_error("rule expected", t)
+  rs = [ r ]
+  while True:
+    t = next(it, None)
+    if t is None: break
+    r = parse_rule(t.content)
+    if not r: break
+    rs.append(r)
+  return (rs, t)
+
+def parse_spec(x):
+  m = re.match("\s*-\s+(?:(\S+):\s*)?(\S+)", x)
+  if m:
+    if m.group(1):
+      suite = m.group(1)
+    else:
+      suite = None
+    return PackageSpec( suite = suite, pkgname = m.group(2) )
+
+def parse_pkgspecs(it, t):
+  specs = []
+  while t != None:
+    s = parse_spec(t.content)
+    if s is None: break
+    specs.append(s)
+    t = next(it, None)
+  return (specs, t)
+
+SourceLine = collections.namedtuple("SourceLine", "content pos")
+
+Stanza = collections.namedtuple("Stanza", "clauses pkgspecs")
+
+def remove_comments(lines):
+  for i, x in enumerate(lines):
+    if re.match("\s*(#.*)?\Z", x, re.S):
       continue
-    r = parse_rule(x)
-    if not r:
-      die("syntax error on line", i)
-    # collect the pkg specs
-    specs = []
-    while i < len(lines):
-      x = lines[i]
-      i += 1
-      if re.match("\s*(#.*)?\Z", x): continue
-      m = re.match("\s*-\s*((\S+):\s+)?(\S+)", x)
-      if m:
-        specs.append( PackageSpec(pkgname = m.group(3), suite = m.group(2)) )
-      else:
-        i -= 1
-        break
-    rs.append( (r, specs) )
-  return rs
+    yield SourceLine(content = x, pos = i)
+  yield None
+
+def parse_rules(lines):
+  it = remove_comments(lines)
+  t = next(it, None)
+  print "t0 =", t
+
+  stanzas = []
+
+  while t:
+    clauses, t = parse_clauses(it, t)
+    print "clauses:", clauses
+    specs, t = parse_pkgspecs(it, t)
+    print "specs:", specs
+    if len(clauses) > 1:
+      stanza = Stanza( clauses=OrClause(clauses), pkgspecs=specs )
+    else:
+      stanza = Stanza( clauses=clauses[0], pkgspecs=specs )
+    stanzas.append(stanza)
+  return stanzas
+
+def test_comments():
+  lines = """
+
+# foo
+  a
+
+        
+b
+   #   
+   c
+""".split("\n")
+  it = remove_comments(lines)
+  for t in it:
+    print t
 
